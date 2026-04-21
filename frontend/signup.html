@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CineMatch | Sign Up</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="css/index.css">
+</head>
+<body>
+
+<header class="header" style="padding: 20px 0 0 0;">
+  <h1 class="logo" style="font-size: 2.5rem;">Cine<span>Match</span></h1>
+  <div class="page-info">
+    <p>Begin your cinematic adventure with a secure account.</p>
+  </div>
+</header>
+
+<main class="page-wrapper">
+  <div class="content-card">
+    <section class="hero">
+      <h2>Join CineMatch</h2>
+    </section>
+
+    <form id="signupForm" class="input-section">
+      <div class="input-group">
+        <label for="username" class="label-required">Username</label>
+        <input type="text" id="username" placeholder="johndoe123" required>
+      </div>
+
+      <div class="input-group">
+        <label for="email" class="label-required">Email Address</label>
+        <input type="email" id="email" placeholder="name@example.com" required>
+      </div>
+
+      <div class="input-group">
+        <label for="favoriteMovie" class="label-required">Favourite Movie</label>
+        <input type="text" id="favoriteMovie" placeholder="e.g. Inception" required>
+      </div>
+
+      <div class="input-group">
+        <div style="display: flex; justify-content: space-between; align-items: baseline;">
+          <label for="password" class="label-required">Password</label>
+          <span class="label-hint">Min. 8 chars, mixed case, number & special</span>
+        </div>
+        <div class="password-input-wrapper">
+          <input type="password" id="password" placeholder="••••••••" required>
+          <i class="fas fa-eye password-toggle" id="togglePassword"></i>
+        </div>
+        <div class="password-strength" id="strengthContainer">
+          <div class="strength-bar" id="strengthBar"></div>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-primary">Create Account</button>
+    </form>
+
+    <div class="auth-footer" style="margin-top: 15px;">
+      Already have an account? <a href="login.html">Sign in</a>
+    </div>
+  </div>
+</main>
+
+<footer class="footer" style="padding: 20px;">
+  <p>CineMatch © 2026</p>
+</footer>
+
+<script src="js/notifications.js"></script>
+<script src="js/auth.js"></script>
+<script>
+  const password = document.querySelector('#password');
+  const strengthContainer = document.querySelector('#strengthContainer');
+  const strengthBar = document.querySelector('#strengthBar');
+
+  // Password strength logic
+  password.addEventListener('input', () => {
+    const val = password.value;
+    if (val.length === 0) {
+      strengthContainer.style.display = 'none';
+      return;
+    }
+    
+    strengthContainer.style.display = 'block';
+    
+    let strength = 0;
+    if (val.length >= 8) strength++;
+    if (/[A-Z]/.test(val) && /[a-z]/.test(val)) strength++;
+    if (/[0-9]/.test(val) && /[@$!%*?&]/.test(val)) strength++;
+
+    strengthBar.className = 'strength-bar';
+    if (strength === 1) strengthBar.classList.add('strength-weak');
+    if (strength === 2) strengthBar.classList.add('strength-medium');
+    if (strength === 3) strengthBar.classList.add('strength-strong');
+  });
+
+  // Toggle visibility
+  document.querySelector('#togglePassword').addEventListener('click', function() {
+    const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+    password.setAttribute('type', type);
+    this.classList.toggle('fa-eye-slash');
+  });
+
+  document.getElementById('signupForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const username = document.getElementById('username').value;
+    const email = document.getElementById('email').value;
+    const favoriteMovie = document.getElementById('favoriteMovie').value;
+    const passwordVal = password.value;
+    
+    try {
+      const response = await fetch('http://localhost:5000/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, email, favoriteMovie, password: passwordVal })
+      });
+      const data = await response.json();
+      if (response.ok) {
+        showToast('Account created successfully!', 'success');
+        setTimeout(() => { window.location.href = 'login.html'; }, 2000);
+      } else {
+        const errorMsg = data.errors ? data.errors[0].msg : data.message;
+        showToast(errorMsg || 'Signup failed', 'error');
+      }
+    } catch (err) {
+      showToast('Error connecting to server', 'error');
+    }
+  });
+</script>
+
+</body>
+</html>

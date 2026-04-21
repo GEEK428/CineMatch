@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CineMatch | Movie Details</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="css/result.css">
+  <style>
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 5px 12px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .user-profile img {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      border: 1px solid var(--primary);
+    }
+    #logoutBtn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-weight: 500;
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+
+<header class="navbar">
+  <div class="logo">Cine<span>Match</span></div>
+  <div style="color: var(--text-muted); font-size: 0.8rem; margin-top: 2px;">Your Personalized Discovery Deck</div>
+  <nav>
+    <a href="index.html">Home</a>
+    <a class="active">Discover</a>
+  </nav>
+  <div id="userSection"></div>
+</header>
+
+<section class="result-container">
+
+  <div class="poster">
+    <img id="mainPoster" src="https://via.placeholder.com/300x450?text=Loading..." alt="Movie Poster">
+  </div>
+
+  <div class="movie-details">
+    <span class="genre-top" id="movieGenreTop">FEATURED MOVIE</span>
+    <h2 id="movieTitle">Loading Title...</h2>
+
+    <div class="meta">
+      <span class="rating" id="movieRating">⭐ 0.0 / 10</span>
+      <span class="genre-badge" id="movieGenre">Genre</span>
+      <span class="badge">4K ULTRA HD</span>
+    </div>
+
+    <p class="description" id="movieDescription">
+      Searching the database for the most relevant details and similar titles...
+    </p>
+  </div>
+
+</section>
+
+<section class="recommendations">
+  <h3>Recommended For You</h3>
+  <div id="recommendationGrid" class="rec-grid">
+    <!-- Recommendations injected here -->
+  </div>
+</section>
+
+<footer>
+  <p>CineMatch © 2026 | Explore the Cinema Universe</p>
+</footer>
+
+<script src="js/notifications.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/dataset.js"></script>
+<script src="js/recommender.js"></script>
+
+<script>
+  // User profile
+  const user = JSON.parse(localStorage.getItem('user'));
+  if (user) {
+    document.getElementById('userSection').innerHTML = `
+      <div class="user-profile" onclick="window.location.href='settings.html'" style="cursor: pointer;">
+        <span style="font-size: 0.85rem; color: #fff;">Hi, ${user.username}!</span>
+        <img src="${user.avatar || 'https://ui-avatars.com/api/?name=' + user.username}" alt="${user.username}">
+        <button id="logoutBtn" onclick="event.stopPropagation(); logout()">Logout</button>
+      </div>
+    `;
+  }
+
+  function logout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = 'login.html';
+  }
+
+  // Load main movie details
+  function loadMovieDetails(){
+    const selectedMovie = localStorage.getItem("selectedMovie");
+    
+    if (!selectedMovie){
+      window.location.href = "index.html";
+      return;
+    }
+
+    const movieData = movies.find(m => m.title === selectedMovie);
+    if (movieData){
+      document.getElementById("movieTitle").innerText = movieData.title;
+      document.getElementById("movieRating").innerText = `⭐ ${movieData.rating} / 10`;
+      document.getElementById("movieGenre").innerText = movieData.genre;
+      document.getElementById("movieGenreTop").innerText = movieData.genre.toUpperCase();
+      
+      const posterImg = document.getElementById("mainPoster");
+      posterImg.src = movieData.poster;
+      posterImg.alt = `${movieData.title} Poster`;
+      posterImg.onerror = function() {
+        this.src = 'https://via.placeholder.com/300x450/1a1d24/8a2be2?text=' + encodeURIComponent(movieData.title);
+      };
+      
+      if (movieData.description) {
+        document.getElementById("movieDescription").innerText = movieData.description;
+      }
+
+      if (window.showToast) {
+        showToast(`Loaded details for ${movieData.title}`, 'success');
+      }
+    }
+    loadRecommendations(selectedMovie);
+  }
+
+  function loadRecommendations(selectedMovie) {
+    const recommendations = getRecommendations(selectedMovie);
+    const grid = document.getElementById("recommendationGrid");
+    grid.innerHTML = '';
+
+    recommendations.forEach(movie => {
+      const card = document.createElement("div");
+      card.className = "rec-card";
+
+      card.innerHTML = `
+        <div class="rec-card-poster">
+          <img src="${movie.poster}" alt="${movie.title}" onerror="this.src='https://via.placeholder.com/300x450/1a1d24/ff007a?text=${encodeURIComponent(movie.title)}'">
+        </div>
+        <div class="rec-card-content">
+          <h4>${movie.title}</h4>
+          <p>${movie.genre} • ⭐ ${movie.rating}</p>
+        </div>
+      `;
+
+      card.onclick = () => {
+        localStorage.setItem("selectedMovie", movie.title);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        loadMovieDetails();
+      };
+
+      grid.appendChild(card);
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', loadMovieDetails);
+</script>
+
+</body>
+</html>

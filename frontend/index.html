@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CineMatch | Movie Recommendation System</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="css/index.css">
+  <style>
+    .user-profile {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      z-index: 100;
+      background: var(--bg-card);
+      padding: 8px 15px;
+      border-radius: 30px;
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(10px);
+    }
+    .user-profile img {
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      border: 2px solid var(--primary);
+    }
+    #logoutBtn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    #logoutBtn:hover {
+      color: var(--secondary);
+    }
+  </style>
+</head>
+<body>
+
+<div id="authHeader"></div>
+
+<header class="header">
+  <h1 class="logo">Cine<span>Match</span></h1>
+  <div class="page-info">
+    <p>Discover personalized movie recommendations powered by cinema intelligence.</p>
+  </div>
+</header>
+
+<main class="page-wrapper">
+  <div class="content-card">
+
+    <section class="hero">
+      <h2>Find Your Next Favorite</h2>
+      <p>
+        Simply search for a movie you love, and our engine will suggest 
+        similar titles you'll enjoy.
+      </p>
+    </section>
+
+    <section class="input-section">
+      <div class="input-group">
+        <label>Search and Select a Movie</label>
+        <div class="searchable-select">
+          <input type="text" id="movieSearch" placeholder="Type a movie title..." class="search-input">
+          <div id="movieDropdown" class="dropdown-list">
+            <!-- Dropdown items will be injected here -->
+          </div>
+          <input type="hidden" id="movieSelect" value="">
+        </div>
+      </div>
+
+      <button class="btn-primary" onclick="goToResults()">Get Recommendations</button>
+    </section>
+
+  </div>
+</main>
+
+<footer class="footer">
+  <p>CineMatch © 2026 | Discover Your Next Favorite Film</p>
+</footer>
+
+<script src="js/notifications.js"></script>
+<script src="js/dataset.js"></script>
+<script src="js/recommender.js"></script>
+<script src="js/main.js"></script>
+
+<script>
+  // Auth check
+  const token = localStorage.getItem('token');
+  const user = JSON.parse(localStorage.getItem('user'));
+
+  if (!token) {
+    window.location.href = 'login.html';
+  } else if (user) {
+    const authHeader = document.getElementById('authHeader');
+    authHeader.innerHTML = `
+      <div class="user-profile" onclick="window.location.href='settings.html'" style="cursor: pointer;">
+        <img src="${user.avatar || 'https://ui-avatars.com/api/?name=' + user.username}" alt="${user.username}">
+        <span>Hi, ${user.username}!</span>
+        <button id="logoutBtn" onclick="event.stopPropagation(); logout()">Logout</button>
+      </div>
+    `;
+  }
+
+  function logout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = 'login.html';
+  }
+
+  function goToResults() {
+    const selected = document.getElementById("movieSelect").value;
+    if (!selected) {
+      alert("Please select a movie");
+      return;
+    }
+    localStorage.setItem("selectedMovie", selected);
+    window.location.href = "result.html";
+  }
+
+  document.getElementById("movieSelect").addEventListener("keypress", function(event) {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      goToResults();
+    }
+  });
+</script>
+
+</body>
+</html>

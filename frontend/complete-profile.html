@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CineMatch | Complete Profile</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="css/index.css">
+</head>
+<body>
+
+<header class="header" style="padding: 20px 0 0 0;">
+  <h1 class="logo" style="font-size: 2.5rem;">Cine<span>Match</span></h1>
+</header>
+
+<main class="page-wrapper">
+  <div class="content-card">
+    <section class="hero">
+      <h2>Almost There!</h2>
+      <p>Finish setting up your profile to start exploring.</p>
+    </section>
+
+    <form id="completeProfileForm" class="input-section">
+      <div class="input-group">
+        <label for="email">Email Address</label>
+        <input type="email" id="email" readonly style="background: rgba(255,255,255,0.02); color: var(--text-muted); cursor: not-allowed;">
+      </div>
+
+      <div class="input-group">
+        <label for="username">Choose a Username</label>
+        <input type="text" id="username" placeholder="johndoe123" required>
+      </div>
+
+      <div class="input-group">
+        <label for="favoriteMovie">Your Favourite Movie</label>
+        <input type="text" id="favoriteMovie" placeholder="e.g. Interstellar" required>
+      </div>
+
+      <button type="submit" class="btn-primary">Complete Setup</button>
+    </form>
+  </div>
+</main>
+
+<footer class="footer" style="padding: 20px;">
+  <p>CineMatch © 2026</p>
+</footer>
+
+<script src="js/notifications.js"></script>
+<script src="js/auth.js"></script>
+<script>
+  // Initial Load with fallback
+  function loadUserData() {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    
+    // Safety Shield: If profile is already complete, go home!
+    if (user.username && user.favoriteMovie) {
+        window.location.href = 'index.html';
+        return null;
+    }
+
+    if (user.email) {
+      document.getElementById('email').value = user.email;
+      return user;
+    }
+    return null;
+  }
+
+  let currentUser = loadUserData();
+  
+  // If not found yet, try again in a moment (in case of race conditions)
+  if (!currentUser) {
+    setTimeout(() => { currentUser = loadUserData(); }, 100);
+  }
+
+  document.getElementById('completeProfileForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!currentUser || !currentUser.email) {
+        // Final attempt to get user
+        currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+        if (!currentUser.email) {
+            showToast('User session not found. Please try logging in again.', 'error');
+            return;
+        }
+    }
+
+    const username = document.getElementById('username').value;
+    const favoriteMovie = document.getElementById('favoriteMovie').value;
+    
+    try {
+      const response = await fetch('http://localhost:5000/api/auth/complete-profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: currentUser.email, username, favoriteMovie })
+      });
+      const data = await response.json();
+      if (response.ok) {
+        showToast('Profile completed successfully!', 'success');
+        // Update local storage user data with merged data
+        const updatedUser = { ...currentUser, username, favoriteMovie };
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        
+        setTimeout(() => {
+            window.location.href = 'index.html';
+        }, 2000);
+      } else {
+        showToast(data.message || 'Setup failed', 'error');
+      }
+    } catch (err) {
+      console.error(err);
+      showToast('Error connecting to server', 'error');
+    }
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CineMatch | Settings</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="css/index.css">
+  <style>
+    .settings-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+    }
+    .profile-master {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    .avatar-preview-wrap {
+      position: relative;
+      width: 120px;
+      height: 120px;
+    }
+    .avatar-preview {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid var(--primary);
+      box-shadow: 0 0 20px var(--primary-glow);
+    }
+    .camera-container {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      background: rgba(0,0,0,0.3);
+      padding: 15px;
+      border-radius: 12px;
+      margin-top: 10px;
+    }
+    #video {
+      width: 100%;
+      max-width: 320px;
+      border-radius: 12px;
+      transform: scaleX(-1);
+    }
+    .media-controls {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .btn-small {
+      padding: 8px 15px;
+      font-size: 0.85rem;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      color: #fff;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .btn-small:hover {
+      background: var(--primary);
+      border-color: var(--primary);
+    }
+    .danger-zone {
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255,77,77,0.2);
+    }
+    .btn-danger {
+      background: rgba(255,77,77,0.1);
+      color: #ff4d4d;
+      border: 1px solid rgba(255,77,77,0.3);
+      padding: 12px;
+      width: 100%;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 700;
+      transition: all 0.3s;
+    }
+    .btn-danger:hover {
+      background: #ff4d4d;
+      color: #fff;
+    }
+    #captureCanvas { display: none; }
+    #fileInput { display: none; }
+  </style>
+</head>
+<body>
+
+<header class="header" style="padding: 20px 0 0 0;">
+  <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 500px; margin: 0 auto; padding: 0 20px;">
+    <h1 class="logo" style="font-size: 2.2rem; margin: 0;">Cine<span>Match</span></h1>
+    <a href="index.html" style="color: var(--primary); font-weight: 600; text-decoration: none; font-size: 0.9rem;"><i class="fas fa-home"></i> Home</a>
+  </div>
+  <div class="page-info">
+    <p>Personalize your experience and manage account security.</p>
+  </div>
+</header>
+
+<main class="page-wrapper" style="min-height: auto; padding: 40px 20px;">
+  <div class="content-card" style="max-width: 500px;">
+    
+    <div class="profile-master">
+      <div class="avatar-preview-wrap">
+        <img id="avatarPreview" src="https://ui-avatars.com/api/?name=User" class="avatar-preview">
+      </div>
+      <div class="media-controls">
+        <button class="btn-small" onclick="document.getElementById('fileInput').click()">
+          <i class="fas fa-upload"></i> Upload
+        </button>
+        <button class="btn-small" id="btnCamera">
+          <i class="fas fa-camera"></i> Take Photo
+        </button>
+        <button class="btn-small" id="btnDeletePhoto" style="color: #ff4d4d;">
+          <i class="fas fa-trash"></i>
+        </button>
+      </div>
+      <input type="file" id="fileInput" accept=".jpg,.jpeg,.png">
+      
+      <div class="camera-container" id="cameraBox">
+        <video id="video" autoplay playsinline></video>
+        <div class="media-controls">
+          <button class="btn-primary" id="btnSnap" style="padding: 8px 25px;">Snap</button>
+          <button class="btn-small" id="btnCancelCam">Cancel</button>
+        </div>
+      </div>
+      <canvas id="captureCanvas" width="400" height="400"></canvas>
+    </div>
+
+    <form id="profileForm" class="input-section">
+      <div class="input-group">
+        <label for="setUsername">Username</label>
+        <input type="text" id="setUsername" placeholder="New username">
+      </div>
+      <div class="input-group">
+        <label for="setFavorite">Favourite Movie</label>
+        <input type="text" id="setFavorite" placeholder="New favorite">
+      </div>
+      <div class="input-group">
+        <label for="setBio">Bio</label>
+        <textarea id="setBio" style="background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 12px; color: #fff; padding: 12px; resize: none; font-family: inherit;" rows="3" placeholder="Tell us about your movie taste..."></textarea>
+      </div>
+      <button type="submit" class="btn-primary">Save Changes</button>
+      <button type="button" class="btn-small" style="margin-top: 10px;" onclick="window.location.href='index.html'">Back to Home</button>
+    </form>
+
+    <div class="danger-zone">
+      <p style="margin-bottom: 10px; font-size: 0.85rem; color: var(--text-muted);">Permanently remove your account and all associated data.</p>
+      <button class="btn-danger" id="btnDeleteAccount">Delete Account Forever</button>
+    </div>
+
+  </div>
+</main>
+
+<script src="js/notifications.js"></script>
+<script src="js/auth.js"></script>
+<script>
+  // Initial fill
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  if (user) {
+    document.getElementById('setUsername').value = user.username || '';
+    document.getElementById('setFavorite').value = user.favoriteMovie || '';
+    document.getElementById('setBio').value = user.bio || '';
+    const avatarImg = document.getElementById('avatarPreview');
+    avatarImg.src = user.avatar || `https://ui-avatars.com/api/?name=${user.username}`;
+  }
+
+  // File Upload
+  document.getElementById('fileInput').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        document.getElementById('avatarPreview').src = event.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+
+  // Camera Logic
+  const video = document.getElementById('video');
+  const cameraBox = document.getElementById('cameraBox');
+  let stream = null;
+
+  document.getElementById('btnCamera').onclick = async () => {
+    try {
+      cameraBox.style.display = 'flex';
+      stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+      video.srcObject = stream;
+    } catch (err) {
+      showToast('Could not access camera', 'error');
+    }
+  };
+
+  document.getElementById('btnCancelCam').onclick = () => {
+    if (stream) stream.getTracks().forEach(t => t.stop());
+    cameraBox.style.display = 'none';
+  };
+
+  document.getElementById('btnSnap').onclick = () => {
+    const canvas = document.getElementById('captureCanvas');
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0, 400, 400);
+    document.getElementById('avatarPreview').src = canvas.toDataURL('image/jpeg');
+    document.getElementById('btnCancelCam').click();
+  };
+
+  document.getElementById('btnDeletePhoto').onclick = () => {
+    document.getElementById('avatarPreview').src = `https://ui-avatars.com/api/?name=${user.username}`;
+  };
+
+  // Submit Profile Changes
+  document.getElementById('profileForm').onsubmit = async (e) => {
+    e.preventDefault();
+    const username = document.getElementById('setUsername').value;
+    const favoriteMovie = document.getElementById('setFavorite').value;
+    const bio = document.getElementById('setBio').value;
+    const avatar = document.getElementById('avatarPreview').src;
+
+    try {
+      const response = await fetch('http://localhost:5000/api/auth/update-profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: user.email, username, favoriteMovie, bio, avatar })
+      });
+      const data = await response.json();
+      if (response.ok) {
+        localStorage.setItem('user', JSON.stringify(data.user));
+        showToast('Profile updated!', 'success');
+        setTimeout(() => location.reload(), 1500);
+      } else {
+        showToast(data.message || 'Update failed', 'error');
+      }
+    } catch (err) {
+      showToast('Connection error', 'error');
+    }
+  };
+
+  // Delete Account
+  document.getElementById('btnDeleteAccount').onclick = async () => {
+    let password = null;
+    // Simple check: if user has a password (not Google user), ask for it
+    // Note: We'd ideally check this on the backend, but a quick prompt is fine for UX
+    const hasPassword = !!(user.id); // Placeholder logic
+    
+    const confirmMsg = "Are you SURE? This will permanently delete your account. This action cannot be undone.";
+    if (!confirm(confirmMsg)) return;
+
+    password = prompt("Please enter your password to confirm deletion (Leave blank for Google accounts):");
+
+    try {
+      const response = await fetch('http://localhost:5000/api/auth/delete-account', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: user.email, password })
+      });
+      const data = await response.json();
+      if (response.ok) {
+        localStorage.clear();
+        showToast('Account deleted. Goodbye!', 'success');
+        setTimeout(() => window.location.href = 'signup.html', 2000);
+      } else {
+        showToast(data.message || 'Deletion failed', 'error');
+      }
+    } catch (err) {
+      showToast('Connection error', 'error');
+    }
+  };
+</script>
+
+</body>
+</html>
